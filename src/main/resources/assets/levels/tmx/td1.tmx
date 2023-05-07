@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.0" orientation="orthogonal" renderorder="right-down" width="25" height="14" tilewidth="64" tileheight="64" infinite="0" nextlayerid="11" nextobjectid="102">
+ <tileset firstgid="1" name="td_tilesheet" tilewidth="64" tileheight="64" tilecount="299" columns="23">
+  <image source="td_tilesheet.png" trans="ffffff" width="1472" height="832"/>
+ </tileset>
+ <layer id="1" name="Ground" class="towerBase" width="25" height="14">
+  <data encoding="base64" compression="zlib">
+   eJxrYmBgaBoAPG+A7B3Fo3gUj+KBxgAPmLHZ
+  </data>
+ </layer>
+ <layer id="2" name="Decor" width="25" height="14">
+  <data encoding="base64" compression="zlib">
+   eJxjYKAOECFCjRiV7BoF+IEYA/6wHuh4GGj7iQWiA+0AMsF9NIwOyPEXsp6NWOSxiVFiL7l2kALoYQcuAACppQh5
+  </data>
+ </layer>
+ <objectgroup id="3" name="Resources">
+  <object id="81" name="tree" type="tree" gid="131" x="773.131" y="311.926" width="64" height="64"/>
+  <object id="82" name="tree" type="tree" gid="131" x="904.71" y="180.347" width="64" height="64"/>
+  <object id="83" name="tree" type="tree" gid="131" x="550.808" y="248.405" width="64" height="64"/>
+  <object id="84" name="tree" type="tree" gid="131" x="348.902" y="581.889" width="64" height="64"/>
+  <object id="85" name="tree" type="tree" gid="131" x="1142.66" y="189.947" width="64" height="64"/>
+  <object id="86" name="tree" type="tree" gid="131" x="1183.75" y="763.377" width="64" height="64"/>
+  <object id="87" name="tree" type="tree" gid="131" x="1179.21" y="350.492" width="64" height="64"/>
+  <object id="88" name="tree" type="tree" gid="131" x="269.501" y="350.492" width="64" height="64"/>
+  <object id="89" name="tree" type="tree" gid="131" x="203.712" y="690.782" width="64" height="64"/>
+  <object id="90" name="tree" type="tree" gid="131" x="675.581" y="677.171" width="64" height="64"/>
+  <object id="91" name="tree" type="tree" gid="131" x="385.200" y="400.401" width="64" height="64"/>
+  <object id="92" name="tree" type="tree" gid="131" x="371.588" y="230.256" width="64" height="64"/>
+  <object id="93" name="tree" type="tree" gid="131" x="1394.73" y="275.628" width="64" height="64"/>
+  <object id="94" name="tree" type="tree" gid="131" x="1338.01" y="575.083" width="64" height="64"/>
+  <object id="95" name="tree" type="tree" gid="131" x="1342.55" y="80.5283" width="64" height="64"/>
+  <object id="96" name="tree" type="tree" gid="131" x="31.2983" y="71.4539" width="64" height="64"/>
+  <object id="97" name="tree" type="tree" gid="131" x="94.8191" y="502.488" width="64" height="64"/>
+  <object id="98" name="tree" type="tree" gid="131" x="49.4471" y="885.882" width="64" height="64"/>
+  <object id="99" name="tree" type="tree" gid="131" x="639.284" y="840.51" width="64" height="64"/>
+  <object id="100" name="tree" type="tree" gid="131" x="423.766" y="776.989" width="64" height="64"/>
+  <object id="101" name="tree" type="tree" gid="131" x="682.118" y="397.246" width="64" height="64"/>
+  <object id="53" name="stone" type="stone"  gid="137" x="1329.16" y="399.514" width="64" height="64"/>
+  <object id="54" name="stone" type="stone"  gid="137" x="426.258" y="340.530" width="64" height="64"/>
+  <object id="55" name="stone" type="stone"  gid="137" x="76.8929" y="154.505" width="64" height="64"/>
+  <object id="56" name="stone" type="stone"  gid="137" x="144.951" y="524.287" width="64" height="64"/>
+  <object id="57" name="stone" type="stone"  gid="137" x="603.209" y="553.779" width="64" height="64"/>
+  <object id="58" name="stone" type="stone"  gid="137" x="333.245" y="696.701" width="64" height="64"/>
+  <object id="59" name="stone" type="stone"  gid="137" x="49.6697" y="796.519" width="64" height="64"/>
+  <object id="60" name="stone" type="stone"  gid="137" x="678.073" y="857.771" width="64" height="64"/>
+  <object id="61" name="stone" type="stone"  gid="137" x="1009.29" y="823.742" width="64" height="64"/>
+  <object id="62" name="stone" type="stone"  gid="137" x="1177.17" y="662.672" width="64" height="64"/>
+  <object id="64" name="stone" type="stone"  gid="137" x="928.666" y="692.367" width="64" height="64"/>
+  <object id="65" name="stone" type="stone"  gid="137" x="936.693" y="474.377" width="64" height="64"/>
+  <object id="66" name="stone" type="stone"  gid="137" x="1106.46" y="211.669" width="64" height="64"/>
+  <object id="67" name="stone" type="stone"  gid="137" x="1480.06" y="541.206" width="64" height="64"/>
+  <object id="68" name="stone" type="stone"  gid="137" x="1102.30" y="363.216" width="64" height="64"/>
+  <object id="69" name="stone" type="stone"  gid="137" x="1351.85" y="220.294" width="64" height="64"/>
+  <object id="70" name="stone" type="stone"  gid="137" x="1292.86" y="113.670" width="64" height="64"/>
+  <object id="71" name="stone" type="stone"  gid="137" x="870.904" y="231.637" width="64" height="64"/>
+  <object id="72" name="stone" type="stone"  gid="137" x="723.445" y="320.113" width="64" height="64"/>
+  <object id="73" name="stone" type="stone"  gid="137" x="571.448" y="297.426" width="64" height="64"/>
+  <object id="74" name="stone" type="stone"  gid="137" x="342.319" y="215.757" width="64" height="64"/>
+  <object id="75" name="stone" type="stone"  gid="137" x="249.307" y="333.724" width="64" height="64"/>
+  <object id="76" name="stone" type="stone"  gid="137" x="655.387" y="90.9837" width="64" height="64"/>
+  <object id="77" name="stone" type="stone"  gid="137" x="58.7441" y="301.964" width="64" height="64"/>
+  <object id="78" name="stone" type="stone"  gid="137" x="1460.74" y="839.623" width="64" height="64"/>
+  <object id="79" name="stone" type="stone"  gid="137" x="1363.19" y="753.416" width="64" height="64"/>
+  <object id="80" name="stone" type="stone"  gid="137" x="1467.55" y="871.383" width="64" height="64"/>
+ </objectgroup>
+</map>
