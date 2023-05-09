@@ -8,10 +8,12 @@ package com.csafinal.basedefense;
 
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.core.math.Vec2;
 import com.almasb.fxgl.dsl.components.HealthIntComponent;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.input.UserAction;
 import com.csafinal.basedefense.components.CollectionComponent;
+import com.csafinal.basedefense.components.MovementComponent;
 import com.csafinal.basedefense.components.PlayerComponent;
 import com.csafinal.basedefense.data.TowerData;
 import javafx.geometry.Point2D;
@@ -81,9 +83,6 @@ public class DropApp extends GameApplication {
 
         run(() -> spawn("enemy"), Duration.seconds(3));
         run(()-> spawn("building"), Duration.seconds(5));
-
-        playerComponent = player.getComponent(PlayerComponent.class);
-        playerComponent.setPlayer(player);
 //        player.rota
 //        loopBGM("bgm.mp3");
 
@@ -97,7 +96,8 @@ public class DropApp extends GameApplication {
         getInput().addAction(new UserAction("Left"){
             @Override
             protected void onAction(){
-                playerComponent.left();
+                player.getComponent(MovementComponent.class).changeMovement(new Vec2(player.getComponent(PlayerComponent.class).getData().speed()*-1, 0));
+                player.getComponent(MovementComponent.class).translate();
                 leftPress = true;
             }
             @Override
@@ -109,7 +109,8 @@ public class DropApp extends GameApplication {
         getInput().addAction(new UserAction("Right"){
             @Override
             protected void onAction(){
-                playerComponent.right();
+                player.getComponent(MovementComponent.class).changeMovement(new Vec2(player.getComponent(PlayerComponent.class).getData().speed(), 0));
+                player.getComponent(MovementComponent.class).translate();
                 rightPress = true;
             }
 
@@ -122,7 +123,8 @@ public class DropApp extends GameApplication {
         getInput().addAction(new UserAction("Down"){
             @Override
             protected void onAction(){
-                playerComponent.down();
+                player.getComponent(MovementComponent.class).changeMovement(new Vec2(0, player.getComponent(PlayerComponent.class).getData().speed()*-1));
+                player.getComponent(MovementComponent.class).translate();
                 downPress = true;
             }
             @Override
@@ -134,7 +136,8 @@ public class DropApp extends GameApplication {
         getInput().addAction(new UserAction("Up"){
             @Override
             protected void onAction(){
-                playerComponent.up();
+                player.getComponent(MovementComponent.class).changeMovement(new Vec2(0, player.getComponent(PlayerComponent.class).getData().speed()));
+                player.getComponent(MovementComponent.class).translate();
                 upPress = true;
             }
 
@@ -236,6 +239,9 @@ public class DropApp extends GameApplication {
 
     @Override
     protected void onUpdate(double tpf) {
+    }
+    private void loadPlayerData(){
+
     }
 
     private void loadTowerData() {
