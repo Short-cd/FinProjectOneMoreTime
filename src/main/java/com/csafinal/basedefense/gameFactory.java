@@ -10,8 +10,10 @@ import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
 import com.csafinal.basedefense.components.BulletComponent;
+import com.csafinal.basedefense.components.EnemyComponent;
 import com.csafinal.basedefense.components.PlayerComponent;
 import com.csafinal.basedefense.components.TowerComponent;
+import com.csafinal.basedefense.data.LivingThingData;
 import com.csafinal.basedefense.data.TowerData;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Point2D;
@@ -27,12 +29,14 @@ public class gameFactory implements EntityFactory{
 
     @Spawns("player")
     public Entity spawnPlayer(SpawnData data){
+        Entity player = data.get("player");
+        LivingThingData pData = data.get("player");
         return entityBuilder(data)
                 .type(DropApp.Type.PLAYER)
                 .at(100, 100)
                 .scale(0.5,0.5)
                 .with(new HealthIntComponent(10))
-                .with(new PlayerComponent())
+                .with(new PlayerComponent(player, pData))
                 .viewWithBBox("player.png")
                 .zIndex(5)
                 .collidable()
@@ -41,6 +45,7 @@ public class gameFactory implements EntityFactory{
 
     @Spawns("enemy")
     public Entity spawnEnemy(SpawnData data){
+        LivingThingData eData = data.get("enemy1");
         HealthIntComponent hp = new HealthIntComponent(2);
         int xval = FXGLMath.random(0, getAppWidth() - 64);
         int yval = FXGLMath.random(0, getAppHeight() - 64);;
@@ -51,7 +56,7 @@ public class gameFactory implements EntityFactory{
                 .type(DropApp.Type.ENEMY)
                 .at(xval, yval)
                 .with(new ProjectileComponent(new Point2D((int) (targetx - xval), (int) (targety - yval)), 150))
-                .with(hp)
+                .with(new EnemyComponent(eData))
                 .viewWithBBox("enemies/enemy1.png")
                 .collidable()
                 .build();
