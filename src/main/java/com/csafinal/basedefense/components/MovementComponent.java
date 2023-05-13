@@ -5,23 +5,26 @@ import com.almasb.fxgl.entity.component.Component;
 import com.csafinal.basedefense.data.LivingThingData;
 
 public class MovementComponent extends Component {
-
-    LivingThingData data;
-    public MovementComponent(LivingThingData data, Entity e){
-        this.data = data;
-        entity = e;
+    double speed;
+    String name;
+    public MovementComponent(double speed, String name){
+        this.speed = speed;
+        this.name=name;
     }
-
     public void setMovement(Vec2 direction){
         movement = direction;
     }
     Vec2 movement = new Vec2(0, 0);
-
     public void changeMovement(Vec2 newDirection){
         movement = movement.add(newDirection);
     }
 
     public void translate(){
         entity.translate(movement);
+    }
+
+    @Override
+    public void onUpdate(double tpf){//debug
+        System.out.println(name + "  " + movement);
     }
 }

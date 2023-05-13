@@ -11,11 +11,14 @@ import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.core.math.Vec2;
 import com.almasb.fxgl.dsl.components.HealthIntComponent;
 import com.almasb.fxgl.entity.Entity;
+import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.input.UserAction;
 import com.csafinal.basedefense.components.CollectionComponent;
 import com.csafinal.basedefense.components.MovementComponent;
 import com.csafinal.basedefense.components.PlayerComponent;
+import com.csafinal.basedefense.data.LivingThingData;
 import com.csafinal.basedefense.data.TowerData;
+import javafx.animation.Interpolator;
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.util.Duration;
@@ -52,7 +55,9 @@ public class DropApp extends GameApplication {
 
     private static List<TowerData> towerData;
 
-    private PlayerComponent playerComponent;
+//    private LivingThingData enemy1Data = getAssetLoader().loadJSON("enemies/enemy1.json", LivingThingData.class).get();
+//    private LivingThingData enemy2Data = getAssetLoader().loadJSON("enemies/enemy2.json", LivingThingData.class).get();
+
     @Override
     protected void initSettings(GameSettings settings) {
         // initialize common game / window settings.
@@ -79,9 +84,20 @@ public class DropApp extends GameApplication {
         loadCurrentLevel();
         loadTowerData();
 
-        player = spawn("player");
-
-        run(() -> spawn("enemy"), Duration.seconds(3));
+        LivingThingData playerData = getAssetLoader().loadJSON("playerTypes/player1.json", LivingThingData.class).get();
+//        spawn("player");
+        player = spawnWithScale(
+                "player",
+                new SpawnData()
+                        .put("playerData", playerData),
+                Duration.seconds(0.1),
+                Interpolator.LINEAR);
+        LivingThingData enemyData = getAssetLoader().loadJSON("enemies/enemy1.json", LivingThingData.class).get();
+        run(() -> spawnWithScale("enemy",
+                new SpawnData()
+                        .put("eData", enemyData),
+                Duration.seconds(3),
+                Interpolator.LINEAR), Duration.seconds(3));
         run(()-> spawn("building"), Duration.seconds(5));
 //        player.rota
 //        loopBGM("bgm.mp3");
@@ -96,7 +112,8 @@ public class DropApp extends GameApplication {
         getInput().addAction(new UserAction("Left"){
             @Override
             protected void onAction(){
-                player.getComponent(MovementComponent.class).changeMovement(new Vec2(player.getComponent(PlayerComponent.class).getData().speed()*-1, 0));
+                player.getComponent(MovementComponent.class).changeMovement(new Vec2(player.
+                        getComponent(PlayerComponent.class).getData().speed(), 0));
                 player.getComponent(MovementComponent.class).translate();
                 leftPress = true;
             }
@@ -109,7 +126,8 @@ public class DropApp extends GameApplication {
         getInput().addAction(new UserAction("Right"){
             @Override
             protected void onAction(){
-                player.getComponent(MovementComponent.class).changeMovement(new Vec2(player.getComponent(PlayerComponent.class).getData().speed(), 0));
+                player.getComponent(MovementComponent.class).changeMovement(new Vec2(player.
+                        getComponent(PlayerComponent.class).getData().speed()*-1, 0));
                 player.getComponent(MovementComponent.class).translate();
                 rightPress = true;
             }
@@ -123,7 +141,8 @@ public class DropApp extends GameApplication {
         getInput().addAction(new UserAction("Down"){
             @Override
             protected void onAction(){
-                player.getComponent(MovementComponent.class).changeMovement(new Vec2(0, player.getComponent(PlayerComponent.class).getData().speed()*-1));
+                player.getComponent(MovementComponent.class).changeMovement(new Vec2(0,
+                        player.getComponent(PlayerComponent.class).getData().speed()));
                 player.getComponent(MovementComponent.class).translate();
                 downPress = true;
             }
@@ -136,7 +155,8 @@ public class DropApp extends GameApplication {
         getInput().addAction(new UserAction("Up"){
             @Override
             protected void onAction(){
-                player.getComponent(MovementComponent.class).changeMovement(new Vec2(0, player.getComponent(PlayerComponent.class).getData().speed()));
+                player.getComponent(MovementComponent.class).changeMovement(new Vec2(0,
+                        player.getComponent(PlayerComponent.class).getData().speed()*-1));
                 player.getComponent(MovementComponent.class).translate();
                 upPress = true;
             }
@@ -202,7 +222,9 @@ public class DropApp extends GameApplication {
             yLoc = thing2.getBottomY();
         }
         Point2D newPoint = new Point2D(xLoc, yLoc);
-//        System.out.println("new point:" + newPoint + "\n playerLocation:" + thing1.getPosition() + " player Dimensions: " + thing1.getWidth()+ " height:" + thing1.getHeight()+ "\n objectLocation:" + thing2.getPosition() +"object dimensions:" + thing2.getWidth() + "height: " + thing2.getHeight());
+//        System.out.println("new point:" + newPoint + "\n playerLocation:" + thing1.getPosition() + " player Dimensions: "
+//        + thing1.getWidth()+ " height:" + thing1.getHeight()+ "\n objectLocation:" + thing2.getPosition() +"object dimensions:"
+//        + thing2.getWidth() + "height: " + thing2.getHeight());
         System.out.println("Stone count " + geti(STONE)+ "\n Wood count: " + geti(WOOD));
         return newPoint;
     }
