@@ -29,14 +29,12 @@ public class gameFactory implements EntityFactory{
 
     @Spawns("player")
     public Entity spawnPlayer(SpawnData data){
-        Entity player = data.get("player");
-        LivingThingData pData = data.get("player");
+        LivingThingData pData = data.get("pData");
         return entityBuilder(data)
                 .type(DropApp.Type.PLAYER)
                 .at(100, 100)
                 .scale(0.5,0.5)
-                .with(new HealthIntComponent(10))
-                .with(new PlayerComponent(player, pData))
+//                .with(new PlayerComponent(pData))
                 .viewWithBBox("player.png")
                 .zIndex(5)
                 .collidable()
@@ -45,7 +43,7 @@ public class gameFactory implements EntityFactory{
 
     @Spawns("enemy")
     public Entity spawnEnemy(SpawnData data){
-        LivingThingData eData = data.get("enemy1");
+        LivingThingData eData = data.get("eData");
         HealthIntComponent hp = new HealthIntComponent(2);
         int xval = FXGLMath.random(0, getAppWidth() - 64);
         int yval = FXGLMath.random(0, getAppHeight() - 64);;

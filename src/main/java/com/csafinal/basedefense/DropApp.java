@@ -47,7 +47,7 @@ public class DropApp extends GameApplication {
             "level1.json"
     );
     boolean downPress, upPress, leftPress, rightPress;
-
+    private SelectBuildingBox buildingSelectionBox;
     private Entity player;
 
     private static List<TowerData> towerData;
@@ -211,6 +211,16 @@ public class DropApp extends GameApplication {
             onHarvesterClicked(e);
         } else {
             collectResource(e, +1);
+            showHarvester(e);
+        }
+    }
+    public static void showHarvester(Entity e){
+
+    }
+
+    public void onTowerSelected(Entity cell, TowerData data){
+        if(data.cost()>= geti(MONEY)){
+            buildingSelectionBox.setVisible(false);
         }
     }
     public static void collectResource(Entity e, double increment){

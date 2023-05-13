@@ -1,7 +1,9 @@
 {
+  "type": "ENEMY",
   "hp": 150,
-  "reward": 15,
-  "moveSpeed": 2.2,
-  "interval": 0.5,
-  "imageName": "enemy1.png"
+  "name": "enemy1",
+  "damage": 2,
+  "speed": 5,
+  "imageName": "enemy1.png",
+  "interval": 0.4
 }

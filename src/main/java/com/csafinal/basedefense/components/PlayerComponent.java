@@ -7,13 +7,14 @@ import com.csafinal.basedefense.data.LivingThingData;
 public class PlayerComponent extends Component {
     Entity entity;
     private LivingThingData data;
-    public PlayerComponent(Entity player, LivingThingData data){
-        entity = player;
+    public PlayerComponent(LivingThingData data){
         this.data = data;
     }
-    public Entity getPlayer(){
-        return entity;
+
+    public void setEntity(Entity entity) {
+        this.entity = entity;
     }
+
     public LivingThingData getData(){
         return data;
     }

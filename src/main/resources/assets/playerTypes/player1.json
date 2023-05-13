@@ -1,0 +1,9 @@
+{
+  "type": "PLAYER",
+  "hp": 50,
+  "name": "player1",
+  "damage": 5,
+  "speed": 10,
+  "imageName": "player.png",
+  "interval": 1.3
+}
