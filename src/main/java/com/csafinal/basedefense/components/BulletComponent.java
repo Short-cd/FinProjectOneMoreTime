@@ -1,8 +1,10 @@
 package com.csafinal.basedefense.components;
 
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.dsl.components.HealthIntComponent;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
+import com.csafinal.basedefense.DropApp;
 import com.csafinal.basedefense.data.Config;
 
 /**
@@ -43,6 +45,7 @@ public class BulletComponent extends Component {
         hp.damage(data.getDamage());
 
         if (hp.isZero()) {
+            FXGL.<DropApp>getAppCast().onEnemyKilled(target);
             target.removeFromWorld();
         }
     }

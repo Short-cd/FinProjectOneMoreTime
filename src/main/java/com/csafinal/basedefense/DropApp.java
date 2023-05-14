@@ -6,6 +6,7 @@
 
 package com.csafinal.basedefense;
 
+import com.almasb.fxgl.animation.Interpolators;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.core.math.Vec2;
@@ -13,11 +14,12 @@ import com.almasb.fxgl.dsl.components.HealthIntComponent;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.input.UserAction;
-import com.csafinal.basedefense.components.CollectionComponent;
+import com.csafinal.basedefense.components.EnemyComponent;
 import com.csafinal.basedefense.components.MovementComponent;
 import com.csafinal.basedefense.components.PlayerComponent;
 import com.csafinal.basedefense.data.LivingThingData;
 import com.csafinal.basedefense.data.TowerData;
+import com.csafinal.basedefense.ui.TowerSelectionBox;
 import javafx.animation.Interpolator;
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
@@ -27,21 +29,12 @@ import java.util.List;
 import java.util.Map;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
-import static com.csafinal.basedefense.DropApp.Vars.*;
+import static com.csafinal.basedefense.data.Vars.*;
 // NOTE: this import above is crucial, it pulls in many useful methods
 
 public class DropApp extends GameApplication {
 
-    static final class Vars{
-        static final String ENEMY_COUNT = "enemyCount";
-        static final String PLAYER_COUNT = "playerCount";
-        static final String BUILDING_COUNT = "buildingCount";
-        static final String MONEY = "money";
-        static final String STONE = "stone";
-        static final String WOOD = "wood";
-        static final String SCORE = "score";
-        static final String DAY_NUMBER = "dayNumber";
-    }
+
     public enum Type {
         BUILDING, ENEMY, PLAYER, TREE, STONE, BULLET
 
@@ -57,6 +50,10 @@ public class DropApp extends GameApplication {
 
     private static int stone = 0;
     private static int wood = 0;
+
+    public int money = 1000;
+
+    private int numTowers;
 
     private static List<TowerData> towerData;
 
@@ -102,13 +99,7 @@ public class DropApp extends GameApplication {
                 Interpolator.LINEAR), Duration.seconds(3));
 
         run(()-> spawn("building"), Duration.seconds(5));
-//        player.rota
-//        loopBGM("bgm.mp3");
-
-//        loadTowerData();
-
-        // construct UI objects
-//        towerSelectionBox = new TowerSelectionBox(towerData);
+        towerSelectionBox = new TowerSelectionBox(towerData);
     }
     @Override
     protected void initInput(){
@@ -117,7 +108,6 @@ public class DropApp extends GameApplication {
             @Override
             protected void onAction() {
                 if (playerAlive) {
-                    System.out.println("left");
                     player.getComponent(MovementComponent.class).changeMovement(new Vec2(player.getComponent(PlayerComponent.class).getData().speed() * -1, 0));
                     player.getComponent(MovementComponent.class).translate();
                     player.getComponent(MovementComponent.class).changeMovement(new Vec2(player.getComponent(PlayerComponent.class).getData().speed() * 1, 0));
@@ -265,11 +255,27 @@ public class DropApp extends GameApplication {
 
     }
 
-    public void onTowerSelected(Entity cell, TowerData data){
-        if(data.cost()>= geti(MONEY)){
-//            buildingSelectionBox.setVisible(false);
+    private TowerSelectionBox towerSelectionBox;
+
+    public void onTowerSelected(Entity cell, TowerData data) {
+        if (geti(MONEY) - data.cost() >= 0) {
+            towerSelectionBox.setVisible(false);
+
+            inc(MONEY, -data.cost());
+
+            var tower = spawnWithScale(
+                    "Tower",
+                    new SpawnData(cell.getPosition()).put("towerData", data),
+                    Duration.seconds(0.85),
+                    Interpolators.ELASTIC.EASE_OUT()
+            );
+
+            cell.setProperty("tower", tower);
+
+            numTowers++;
         }
     }
+
     public static void collectResource(Entity e, double increment){
         switch ((Type)e.getType()) {
             case TREE: {
@@ -291,14 +297,15 @@ public class DropApp extends GameApplication {
         if (cell.getProperties().exists("tower"))
             return;
 
-//        towerSelectionBox.setCell(cell);
-//        towerSelectionBox.setVisible(true);
+        towerSelectionBox.setCell(cell);
+        towerSelectionBox.setVisible(true);
 
         var x = cell.getX() > getAppWidth() / 2.0 ? cell.getX() - 250 : cell.getX();
 
 //        towerSelectionBox.setTranslateX(x);
 //        towerSelectionBox.setTranslateY(cell.getY());
     }
+
 
     @Override
     protected void onUpdate(double tpf) {
@@ -332,12 +339,17 @@ public class DropApp extends GameApplication {
         getGameWorld().getEntitiesFiltered(e -> e.isType("TiledMapLayer"))
                 .forEach(e -> {
                     e.getViewComponent().addOnClickHandler(event -> {
-//                        towerSelectionBox.setVisible(false);
+                        towerSelectionBox.setVisible(true);
+                        onCellClicked(spawn("cell"));
                     });
                 });
     }
     public void removeEntity(Entity object){
         object.removeFromWorld();
+    }
+
+    public void onEnemyKilled(Entity enemy) {
+        inc(MONEY, enemy.getComponent(EnemyComponent.class).getData().reward());
     }
 
     public void revivePlayer(){

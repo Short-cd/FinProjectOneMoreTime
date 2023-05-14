@@ -40,4 +40,8 @@ public class EnemyComponent extends Component {
             target.removeFromWorld();
         }
     }
+
+    public LivingThingData getData() {
+        return data;
+    }
 }

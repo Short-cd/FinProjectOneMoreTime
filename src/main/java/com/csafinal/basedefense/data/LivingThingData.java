@@ -9,6 +9,7 @@ public record LivingThingData(
         int damage,
         double speed,
         String imageName,
-        double interval
+        double interval,
+        int reward
 ) {
 }
