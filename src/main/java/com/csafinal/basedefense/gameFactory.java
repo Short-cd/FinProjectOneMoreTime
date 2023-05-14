@@ -9,10 +9,7 @@ import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
-import com.csafinal.basedefense.components.BulletComponent;
-import com.csafinal.basedefense.components.EnemyComponent;
-import com.csafinal.basedefense.components.PlayerComponent;
-import com.csafinal.basedefense.components.TowerComponent;
+import com.csafinal.basedefense.components.*;
 import com.csafinal.basedefense.data.LivingThingData;
 import com.csafinal.basedefense.data.TowerData;
 import javafx.beans.binding.Bindings;
@@ -29,12 +26,14 @@ public class gameFactory implements EntityFactory{
 
     @Spawns("player")
     public Entity spawnPlayer(SpawnData data){
-        LivingThingData pData = data.get("pData");
+        LivingThingData playerData = data.get("playerData");
         return entityBuilder(data)
                 .type(DropApp.Type.PLAYER)
                 .at(100, 100)
                 .scale(0.5,0.5)
-//                .with(new PlayerComponent(pData))
+                .with(new HealthIntComponent(playerData.hp()))
+                .with(new MovementComponent(playerData.speed(), "player"))
+                .with(new PlayerComponent(playerData))
                 .viewWithBBox("player.png")
                 .zIndex(5)
                 .collidable()
@@ -54,6 +53,7 @@ public class gameFactory implements EntityFactory{
                 .type(DropApp.Type.ENEMY)
                 .at(xval, yval)
                 .with(new ProjectileComponent(new Point2D((int) (targetx - xval), (int) (targety - yval)), 150))
+                .with(new HealthIntComponent(eData.hp()))
                 .with(new EnemyComponent(eData))
                 .viewWithBBox("enemies/enemy1.png")
                 .collidable()
