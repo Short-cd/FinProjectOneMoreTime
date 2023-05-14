@@ -55,6 +55,9 @@ public class DropApp extends GameApplication {
 
     private boolean playerAlive;
 
+    private static int stone = 0;
+    private static int wood = 0;
+
     private static List<TowerData> towerData;
 
 //    private LivingThingData enemy1Data = getAssetLoader().loadJSON("enemies/enemy1.json", LivingThingData.class).get();
@@ -269,8 +272,14 @@ public class DropApp extends GameApplication {
     }
     public static void collectResource(Entity e, double increment){
         switch ((Type)e.getType()) {
-            case TREE -> inc(WOOD, increment);
-            case STONE -> inc(STONE, increment);
+            case TREE: {
+//                inc(WOOD, increment);
+                wood++;
+            }
+            case STONE: {
+//                inc(STONE, increment);
+                stone++;
+            }
         }
     }
 
@@ -335,12 +344,8 @@ public class DropApp extends GameApplication {
         if (!playerAlive) {
             LivingThingData playerData = getAssetLoader().loadJSON("playerTypes/player1.json", LivingThingData.class).get();
 //        spawn("player");
-            player = spawnWithScale(
-                    "player",
-                    new SpawnData()
-                            .put("playerData", playerData),
-                    Duration.seconds(0.1),
-                    Interpolator.LINEAR);
+            player = spawn("player", new SpawnData().put("playerData", playerData));
+            playerAlive = true;
         }
     }
 
