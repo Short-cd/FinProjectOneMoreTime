@@ -10,7 +10,9 @@ import com.almasb.fxgl.animation.Interpolators;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.core.math.Vec2;
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.dsl.components.HealthIntComponent;
+import com.almasb.fxgl.dsl.components.ProjectileComponent;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.input.UserAction;
@@ -23,12 +25,15 @@ import com.csafinal.basedefense.ui.TowerSelectionBox;
 import javafx.animation.Interpolator;
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.List;
 import java.util.Map;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
+import static com.csafinal.basedefense.DropApp.Type.TREE;
 import static com.csafinal.basedefense.data.Vars.*;
 // NOTE: this import above is crucial, it pulls in many useful methods
 
@@ -36,7 +41,7 @@ public class DropApp extends GameApplication {
 
 
     public enum Type {
-        BUILDING, ENEMY, PLAYER, TREE, STONE, BULLET
+        BUILDING, ENEMY, PLAYER, TREE, STONE, BULLET, TOWER_BASE
 
     }
     List<String> levelNames = List.of(
@@ -48,10 +53,12 @@ public class DropApp extends GameApplication {
 
     private boolean playerAlive;
 
-    private static int stone = 0;
+    private static int cobblestone = 0;
     private static int wood = 0;
 
-    public int money = 1000;
+    long startTime;
+
+    public int lives = 3;
 
     private int numTowers;
 
@@ -74,7 +81,7 @@ public class DropApp extends GameApplication {
         vars.put(ENEMY_COUNT, 0);
         vars.put(PLAYER_COUNT, 0);
         vars.put(BUILDING_COUNT, 0);
-        vars.put(MONEY, 0);
+        vars.put(MONEY, 1000);
         vars.put(STONE, 0);
         vars.put(WOOD, 0);
         vars.put(SCORE, 0);
@@ -82,6 +89,8 @@ public class DropApp extends GameApplication {
     }
     @Override
     protected void initGame() {
+        startTime = System.nanoTime();
+
         getGameWorld().addEntityFactory(new gameFactory());
         loadCurrentLevel();
         loadTowerData();
@@ -97,8 +106,6 @@ public class DropApp extends GameApplication {
                         .put("eData", enemyData),
                 Duration.seconds(3),
                 Interpolator.LINEAR), Duration.seconds(3));
-
-        run(()-> spawn("building"), Duration.seconds(5));
         towerSelectionBox = new TowerSelectionBox(towerData);
     }
     @Override
@@ -175,7 +182,7 @@ public class DropApp extends GameApplication {
         getInput().addAction(new UserAction("info") {
             @Override
             protected void onAction() {
-                System.out.println("Stone count " + geti(STONE) + "\n Wood count: " + geti(WOOD));
+                System.out.println("Stone count: " + cobblestone + "\n Wood count: " + wood);
             }
         }, KeyCode.I);
 
@@ -191,7 +198,6 @@ public class DropApp extends GameApplication {
 
     @Override
     protected void initPhysics() {
-        int playerCount = 1;
         onCollisionBegin(Type.BUILDING, Type.ENEMY, (building, enemy) -> {
             var hp = building.getComponent(HealthIntComponent.class);
             if (hp.getValue() > 1){
@@ -208,8 +214,8 @@ public class DropApp extends GameApplication {
             }
             player.removeFromWorld();
             playerAlive = false;
-            if(playerCount<1){
-                endGame(false);
+            if(lives<1){
+                endGame();
             }
         });
         onCollision(Type.PLAYER, Type.BUILDING, (player, nonPlayer) -> {
@@ -217,6 +223,12 @@ public class DropApp extends GameApplication {
         });
     }
 
+    @Override
+    protected void initUI() {
+        towerSelectionBox.setVisible(false);
+
+        addUINode(towerSelectionBox);
+    }
 
     private Point2D checkCollisionLocation(Entity thing1, Entity thing2){
         double xLoc = thing1.getX(), yLoc = thing1.getY();
@@ -243,6 +255,7 @@ public class DropApp extends GameApplication {
         System.out.println("Stone count " + geti(STONE)+ "\n Wood count: " + geti(WOOD));
         return newPoint;
     }
+
     public void onResourceClicked(Entity e) {
         if (e.getProperties().exists("resourceHarvester")) {
             onHarvesterClicked(e);
@@ -263,8 +276,9 @@ public class DropApp extends GameApplication {
 
             inc(MONEY, -data.cost());
 
+            System.out.println(cell.getPosition());
             var tower = spawnWithScale(
-                    "Tower",
+                    "building",
                     new SpawnData(cell.getPosition()).put("towerData", data),
                     Duration.seconds(0.85),
                     Interpolators.ELASTIC.EASE_OUT()
@@ -277,15 +291,12 @@ public class DropApp extends GameApplication {
     }
 
     public static void collectResource(Entity e, double increment){
-        switch ((Type)e.getType()) {
-            case TREE: {
+        if (e.isType(TREE)) {
 //                inc(WOOD, increment);
-                wood++;
-            }
-            case STONE: {
+            wood++;
+        } else if (e.isType(Type.STONE)) {
 //                inc(STONE, increment);
-                stone++;
-            }
+            cobblestone++;
         }
     }
 
@@ -294,16 +305,19 @@ public class DropApp extends GameApplication {
     }
     public void onCellClicked(Entity cell) {
         // if we already have a tower on this tower base, ignore call
-        if (cell.getProperties().exists("tower"))
+        if (cell.getProperties().exists("tower")) {
             return;
+        }
+
+        System.out.println("cellclicked: (" + cell.getX() +", " + cell.getY() + ")");
 
         towerSelectionBox.setCell(cell);
         towerSelectionBox.setVisible(true);
 
         var x = cell.getX() > getAppWidth() / 2.0 ? cell.getX() - 250 : cell.getX();
 
-//        towerSelectionBox.setTranslateX(x);
-//        towerSelectionBox.setTranslateY(cell.getY());
+        towerSelectionBox.setTranslateX(x);
+        towerSelectionBox.setTranslateY(cell.getY());
     }
 
 
@@ -329,9 +343,6 @@ public class DropApp extends GameApplication {
                 .toList();
     }
 
-    public static TowerData getTower() {
-        return towerData.get(0);
-    }
 
     private void loadCurrentLevel() {
         setLevelFromMap("tmx/td1.tmx");
@@ -339,8 +350,7 @@ public class DropApp extends GameApplication {
         getGameWorld().getEntitiesFiltered(e -> e.isType("TiledMapLayer"))
                 .forEach(e -> {
                     e.getViewComponent().addOnClickHandler(event -> {
-                        towerSelectionBox.setVisible(true);
-                        onCellClicked(spawn("cell"));
+                        spawn("towerBase", new SpawnData(event.getX(),event.getY()));
                     });
                 });
     }
@@ -358,15 +368,16 @@ public class DropApp extends GameApplication {
 //        spawn("player");
             player = spawn("player", new SpawnData().put("playerData", playerData));
             playerAlive = true;
+            lives--;
+            if (lives<=0){
+                endGame();
+            }
         }
     }
 
-    private void endGame(boolean won){
-        if(won){
-
-        }else{
-
-        }
+    private void endGame(){
+        long score = (System.nanoTime()-startTime)/1000;
+        System.out.println("Score: " + score);
     }
 
     public static void main(String[] args) {

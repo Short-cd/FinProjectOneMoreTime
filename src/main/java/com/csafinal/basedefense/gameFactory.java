@@ -20,6 +20,7 @@ import javafx.scene.shape.Rectangle;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
 import static com.csafinal.basedefense.DropApp.Type.BULLET;
+import static com.csafinal.basedefense.DropApp.Type.TOWER_BASE;
 
 
 public class gameFactory implements EntityFactory{
@@ -80,16 +81,35 @@ public class gameFactory implements EntityFactory{
                 .build();
     }
 
+    @Spawns("towerBase")
+    public Entity newTowerBase(SpawnData data) {
+        var rect = new Rectangle(64, 64, Color.GREEN);
+        rect.setOpacity(0.25);
+
+        var cell = entityBuilder(data)
+                .type(TOWER_BASE)
+                .viewWithBBox(rect)
+                .onClick(e -> {
+                    FXGL.<DropApp>getAppCast().onCellClicked(e);
+                })
+                .build();
+
+        rect.fillProperty().bind(
+                Bindings.when(cell.getViewComponent().getParent().hoverProperty())
+                        .then(Color.DARKGREEN)
+                        .otherwise(Color.GREEN)
+        );
+
+        return cell;
+    }
+
     @Spawns("building")
     public Entity spawnBuilding(SpawnData data){
-        TowerData towerData = DropApp.getTower();
+        TowerData towerData = data.get("towerData");
 
-        int xval = FXGLMath.random(0, getAppWidth() - 64);
-        int yval = 0;
-        return entityBuilder()
+        return entityBuilder(data)
                 .type(DropApp.Type.BUILDING)
-                .at(xval, yval)
-                .viewWithBBox("towers/tower1.png")
+                .viewWithBBox(towerData.imageName())
                 .with(new HealthIntComponent(10))
                 .with(new TowerComponent(towerData))
                 .collidable()
@@ -98,7 +118,7 @@ public class gameFactory implements EntityFactory{
 
     @Spawns("tree")
     public Entity newTree(SpawnData data) {
-        var rect = new Rectangle(64, 64, Color.GREEN);
+        var rect = new Rectangle(64, 64, Color.BLUE);
         rect.setOpacity(0.25);
 
         var cell = entityBuilder(data)
@@ -111,7 +131,7 @@ public class gameFactory implements EntityFactory{
 
         rect.fillProperty().bind(
                 Bindings.when(cell.getViewComponent().getParent().hoverProperty())
-                        .then(Color.DARKGREEN)
+                        .then(Color.DARKBLUE)
                         .otherwise(Color.rgb(46, 204, 113))
         );
 
@@ -124,7 +144,7 @@ public class gameFactory implements EntityFactory{
         rect.setOpacity(0.25);
 
         var cell = entityBuilder(data)
-                .type(DropApp.Type.TREE)
+                .type(DropApp.Type.STONE)
                 .viewWithBBox(rect)
                 .onClick(e -> {
                     FXGL.<DropApp>getAppCast().onResourceClicked(e);

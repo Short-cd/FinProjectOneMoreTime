@@ -1,0 +1,10 @@
+{
+  "type": "ENEMY",
+  "hp": 500,
+  "name": "boss1",
+  "damage": 10,
+  "speed": 1,
+  "imageName": "enemy4.png",
+  "interval": 0.001,
+  "reward": 250
+}
