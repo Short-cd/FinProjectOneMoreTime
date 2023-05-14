@@ -50,8 +50,10 @@ public class DropApp extends GameApplication {
             "level1.json"
     );
     boolean downPress, upPress, leftPress, rightPress;
-    private SelectBuildingBox buildingSelectionBox;
+//    private SelectBuildingBox buildingSelectionBox;
     private Entity player;
+
+    private boolean playerAlive;
 
     private static List<TowerData> towerData;
 
@@ -86,18 +88,16 @@ public class DropApp extends GameApplication {
 
         LivingThingData playerData = getAssetLoader().loadJSON("playerTypes/player1.json", LivingThingData.class).get();
 //        spawn("player");
-        player = spawnWithScale(
-                "player",
-                new SpawnData()
-                        .put("playerData", playerData),
-                Duration.seconds(0.1),
-                Interpolator.LINEAR);
+        player = spawn("player", new SpawnData().put("playerData", playerData));
+        playerAlive = true;
+
         LivingThingData enemyData = getAssetLoader().loadJSON("enemies/enemy1.json", LivingThingData.class).get();
         run(() -> spawnWithScale("enemy",
                 new SpawnData()
                         .put("eData", enemyData),
                 Duration.seconds(3),
                 Interpolator.LINEAR), Duration.seconds(3));
+
         run(()-> spawn("building"), Duration.seconds(5));
 //        player.rota
 //        loopBGM("bgm.mp3");
@@ -109,76 +109,97 @@ public class DropApp extends GameApplication {
     }
     @Override
     protected void initInput(){
-        getInput().addAction(new UserAction("Left"){
+
+        getInput().addAction(new UserAction("Left") {
             @Override
-            protected void onAction(){
-                player.getComponent(MovementComponent.class).changeMovement(new Vec2(player.
-                        getComponent(PlayerComponent.class).getData().speed(), 0));
-                player.getComponent(MovementComponent.class).translate();
-                leftPress = true;
+            protected void onAction() {
+                if (playerAlive) {
+                    System.out.println("left");
+                    player.getComponent(MovementComponent.class).changeMovement(new Vec2(player.getComponent(PlayerComponent.class).getData().speed() * -1, 0));
+                    player.getComponent(MovementComponent.class).translate();
+                    player.getComponent(MovementComponent.class).changeMovement(new Vec2(player.getComponent(PlayerComponent.class).getData().speed() * 1, 0));
+                    leftPress = true;
+                }
             }
+
             @Override
-            protected void onActionEnd(){
+            protected void onActionEnd() {
                 leftPress = false;
             }
         }, KeyCode.A);
 
-        getInput().addAction(new UserAction("Right"){
+        getInput().addAction(new UserAction("Right") {
             @Override
-            protected void onAction(){
-                player.getComponent(MovementComponent.class).changeMovement(new Vec2(player.
-                        getComponent(PlayerComponent.class).getData().speed()*-1, 0));
-                player.getComponent(MovementComponent.class).translate();
-                rightPress = true;
+            protected void onAction() {
+                if (playerAlive) {
+                    player.getComponent(MovementComponent.class).changeMovement(new Vec2(player.getComponent(PlayerComponent.class).getData().speed() * 1, 0));
+                    player.getComponent(MovementComponent.class).translate();
+                    player.getComponent(MovementComponent.class).changeMovement(new Vec2(player.getComponent(PlayerComponent.class).getData().speed() * -1, 0));
+                    rightPress = true;
+                }
             }
 
             @Override
-            protected void onActionEnd(){
+            protected void onActionEnd() {
                 rightPress = false;
             }
         }, KeyCode.D);
 
-        getInput().addAction(new UserAction("Down"){
+        getInput().addAction(new UserAction("Down") {
             @Override
-            protected void onAction(){
-                player.getComponent(MovementComponent.class).changeMovement(new Vec2(0,
-                        player.getComponent(PlayerComponent.class).getData().speed()));
-                player.getComponent(MovementComponent.class).translate();
-                downPress = true;
+            protected void onAction() {
+                if (playerAlive) {
+                    player.getComponent(MovementComponent.class).changeMovement(new Vec2(0, player.getComponent(PlayerComponent.class).getData().speed() * 1));
+                    player.getComponent(MovementComponent.class).translate();
+                    player.getComponent(MovementComponent.class).changeMovement(new Vec2(0, player.getComponent(PlayerComponent.class).getData().speed() * -1));
+                    downPress = true;
+                }
             }
+
             @Override
-            protected void onActionEnd(){
+            protected void onActionEnd() {
                 downPress = false;
             }
         }, KeyCode.S);
 
-        getInput().addAction(new UserAction("Up"){
+        getInput().addAction(new UserAction("Up") {
             @Override
-            protected void onAction(){
-                player.getComponent(MovementComponent.class).changeMovement(new Vec2(0,
-                        player.getComponent(PlayerComponent.class).getData().speed()*-1));
-                player.getComponent(MovementComponent.class).translate();
-                upPress = true;
+            protected void onAction() {
+                if (playerAlive) {
+                    player.getComponent(MovementComponent.class).changeMovement(new Vec2(0, player.getComponent(PlayerComponent.class).getData().speed() * -1));
+                    player.getComponent(MovementComponent.class).translate();
+                    player.getComponent(MovementComponent.class).changeMovement(new Vec2(0, player.getComponent(PlayerComponent.class).getData().speed() * 1));
+                    upPress = true;
+                }
             }
 
             @Override
-            protected void onActionEnd(){
+            protected void onActionEnd() {
                 upPress = false;
             }
         }, KeyCode.W);
 
-        getInput().addAction(new UserAction("info"){
+        getInput().addAction(new UserAction("info") {
             @Override
-            protected void onAction(){
-                System.out.println("Stone count " + geti(STONE)+ "\n Wood count: " + geti(WOOD));
+            protected void onAction() {
+                System.out.println("Stone count " + geti(STONE) + "\n Wood count: " + geti(WOOD));
             }
         }, KeyCode.I);
+
+        getInput().addAction(new UserAction("Revive") {
+            @Override
+            protected void onAction() {
+                System.out.println("R");
+                revivePlayer();
+            }
+        }, KeyCode.R);
+
     }
 
     @Override
     protected void initPhysics() {
         int playerCount = 1;
-        onCollision(Type.BUILDING, Type.ENEMY, (building, enemy) -> {
+        onCollisionBegin(Type.BUILDING, Type.ENEMY, (building, enemy) -> {
             var hp = building.getComponent(HealthIntComponent.class);
             if (hp.getValue() > 1){
                 hp.damage(1);
@@ -186,13 +207,14 @@ public class DropApp extends GameApplication {
             }
             building.removeFromWorld();
         });
-        onCollision(Type.PLAYER, Type.ENEMY, (player, enemy) -> {
+        onCollisionBegin(Type.PLAYER, Type.ENEMY, (player, enemy) -> {
             var hp = player.getComponent(HealthIntComponent.class);
             if (hp.getValue() > 1){
                 hp.damage(1);
                 return;
             }
             player.removeFromWorld();
+            playerAlive = false;
             if(playerCount<1){
                 endGame(false);
             }
@@ -232,7 +254,7 @@ public class DropApp extends GameApplication {
         if (e.getProperties().exists("resourceHarvester")) {
             onHarvesterClicked(e);
         } else {
-            collectResource(e, +1);
+            collectResource(e, 1);
             showHarvester(e);
         }
     }
@@ -242,7 +264,7 @@ public class DropApp extends GameApplication {
 
     public void onTowerSelected(Entity cell, TowerData data){
         if(data.cost()>= geti(MONEY)){
-            buildingSelectionBox.setVisible(false);
+//            buildingSelectionBox.setVisible(false);
         }
     }
     public static void collectResource(Entity e, double increment){
@@ -307,6 +329,19 @@ public class DropApp extends GameApplication {
     }
     public void removeEntity(Entity object){
         object.removeFromWorld();
+    }
+
+    public void revivePlayer(){
+        if (!playerAlive) {
+            LivingThingData playerData = getAssetLoader().loadJSON("playerTypes/player1.json", LivingThingData.class).get();
+//        spawn("player");
+            player = spawnWithScale(
+                    "player",
+                    new SpawnData()
+                            .put("playerData", playerData),
+                    Duration.seconds(0.1),
+                    Interpolator.LINEAR);
+        }
     }
 
     private void endGame(boolean won){

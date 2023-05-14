@@ -25,6 +25,6 @@ public class MovementComponent extends Component {
 
     @Override
     public void onUpdate(double tpf){//debug
-        System.out.println(name + "  " + movement);
+//        System.out.println(name + "  " + movement);
     }
 }

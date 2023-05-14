@@ -30,7 +30,7 @@ public class gameFactory implements EntityFactory{
         return entityBuilder(data)
                 .type(DropApp.Type.PLAYER)
                 .at(100, 100)
-                .scale(0.5,0.5)
+                .scale(0.2,0.2)
                 .with(new HealthIntComponent(playerData.hp()))
                 .with(new MovementComponent(playerData.speed(), "player"))
                 .with(new PlayerComponent(playerData))

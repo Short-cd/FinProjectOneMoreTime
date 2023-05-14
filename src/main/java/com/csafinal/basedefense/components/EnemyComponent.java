@@ -22,9 +22,11 @@ public class EnemyComponent extends Component {
         getGameWorld().getClosestEntity(entity, e -> e.isType(DropApp.Type.BUILDING)).ifPresent(nearestEnemy -> {
             target = nearestEnemy;
         });
-        Point2D targetLoc = target.getPosition();
-        Vec2 targetDirection = new Vec2(targetLoc);
-        targetDirection.mulLocal(data.speed()/targetDirection.distance(targetLoc));
+        if (target != null) {
+            Point2D targetLoc = target.getPosition();
+            Vec2 targetDirection = new Vec2(targetLoc);
+            targetDirection.mulLocal(data.speed() / targetDirection.distance(targetLoc));
+        }
     }
 
     public double getDamage() {
