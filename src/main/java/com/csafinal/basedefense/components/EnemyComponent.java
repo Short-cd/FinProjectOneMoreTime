@@ -19,7 +19,7 @@ public class EnemyComponent extends Component {
     }
     @Override
     public void onUpdate(double tpf){
-        getGameWorld().getClosestEntity(entity, e -> e.isType(DropApp.Type.BUILDING)).ifPresent(nearestEnemy -> {
+        getGameWorld().getClosestEntity(entity, e -> e.isType(DropApp.Type.BUILDING) || e.isType(DropApp.Type.PLAYER)).ifPresent(nearestEnemy -> {
             target = nearestEnemy;
         });
         if (target != null) {

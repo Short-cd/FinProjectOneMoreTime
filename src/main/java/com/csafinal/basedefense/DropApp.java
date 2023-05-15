@@ -31,6 +31,7 @@ import javafx.util.Duration;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
 import static com.csafinal.basedefense.DropApp.Type.TREE;
@@ -242,9 +243,50 @@ public class DropApp extends GameApplication {
             protected void onAction() {
                 System.out.println("R");
                 revivePlayer();
+
             }
         }, KeyCode.R);
 
+        getInput().addAction(new UserAction("Shoot") {
+            @Override
+            protected void onAction() {
+                getGameWorld()
+                    .getClosestEntity(player, e -> e.isType(DropApp.Type.ENEMY))
+                    .ifPresent(nearestEnemy -> {
+                        shoot(nearestEnemy);
+                });
+
+            }
+        }, KeyCode.S);
+
+        getInput().addAction(new UserAction("SpawnBoss") {
+            @Override
+            protected void onAction() {
+                LivingThingData enemyData = getAssetLoader().loadJSON("enemies/enemy5.json", LivingThingData.class).get();
+
+
+                spawnWithScale("enemy",
+                        new SpawnData()
+                                .put("eData", enemyData),
+                        Duration.seconds(0.1),
+                        Interpolator.LINEAR);
+            }
+        }, KeyCode.K);
+
+    }
+
+    private void shoot(Entity nearestEnemy) {
+            Point2D position = player.getPosition();
+
+            Point2D direction = nearestEnemy.getPosition().subtract(position);
+
+            var bullet = spawn("Bullet",
+                    new SpawnData(position)
+                            .put("imageName", "projectile1.png")
+                            .put("player", player)
+                            .put("target", nearestEnemy)
+            );
+            bullet.rotateToVector(direction);
     }
 
     @Override
@@ -508,8 +550,10 @@ public class DropApp extends GameApplication {
     }
 
     private void endGame(){
-        long score = (System.nanoTime()-startTime)/1000;
+        long score = (System.nanoTime()-startTime)/1000000;
+        score += getWood() + getCobblestone();
         System.out.println("Score: " + score);
+        addText("GAME OVER" + "\n Score: " + score, 1600,896);
     }
 
     public static void main(String[] args) {

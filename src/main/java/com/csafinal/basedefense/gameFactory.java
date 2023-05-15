@@ -85,6 +85,26 @@ public class gameFactory implements EntityFactory{
                 .build();
     }
 
+    @Spawns("Bullet2")
+    public Entity spawnBullet2(SpawnData data) {
+        String imageName = data.get("imageName");
+
+        Node view = texture(imageName);
+        view.setRotate(90);
+
+        Entity player = data.get("player");
+        Entity target = data.get("target");
+
+        return entityBuilder(data)
+                .type(BULLET)
+                .viewWithBBox(view)
+                .collidable()
+                .with(new BulletComponent2(player, target))
+                .with(new AutoRotationComponent())
+                .zIndex(4)
+                .build();
+    }
+
     @Spawns("towerBase")
     public Entity newTowerBase(SpawnData data) {
         var rect = new Rectangle(64, 64, Color.GREEN);
@@ -114,7 +134,7 @@ public class gameFactory implements EntityFactory{
         return entityBuilder(data)
                 .type(DropApp.Type.BUILDING)
                 .viewWithBBox(towerData.imageName())
-                .with(new HealthIntComponent(10))
+                .with(new HealthIntComponent(towerData.hp()))
                 .with(new TowerComponent(towerData))
                 .collidable()
                 .build();
