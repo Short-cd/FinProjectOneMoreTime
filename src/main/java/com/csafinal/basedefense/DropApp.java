@@ -25,6 +25,7 @@ import com.csafinal.basedefense.ui.ResourceSelectionBox;
 import com.csafinal.basedefense.ui.TowerSelectionBox;
 import javafx.animation.Interpolator;
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import javafx.util.Duration;
 
@@ -231,6 +232,8 @@ public class DropApp extends GameApplication {
             @Override
             protected void onAction() {
                 towerSelectionBox.setVisible(false);
+                treeBox.setVisible(false);
+                stoneBox.setVisible(false);
             }
         }, KeyCode.Q);
 
@@ -275,8 +278,12 @@ public class DropApp extends GameApplication {
     @Override
     protected void initUI() {
         towerSelectionBox.setVisible(false);
+        treeBox.setVisible(false);
+        stoneBox.setVisible(false);
         setStats();
         addUINode(towerSelectionBox);
+        addUINode(treeBox);
+        addUINode(stoneBox);
         addUINode(stats);
     }
 
@@ -311,36 +318,51 @@ public class DropApp extends GameApplication {
     private ResourceSelectionBox stoneBox;
 
     public void onResourceClicked(Entity e) {
-        if (e.getProperties().exists("resourceHarvester")) {
+        if (e.getProperties().exists("level")) {
             onHarvesterClicked(e);
-        } else {
-            collectResource(e, 1);
-            showHarvester(e);
         }
+
+        collectResource(e, 1);
+        System.out.println("cellclicked: (" + e.getX() +", " + e.getY() + ")");
+
+        if (e.isType(TREE)){
+            treeBox.setCell(e);
+            treeBox.setVisible(true);
+
+            var x = e.getX() > getAppWidth() / 2.0 ? e.getX() - 250 : e.getX();
+
+            treeBox.setTranslateX(x);
+            treeBox.setTranslateY(e.getY());
+        } else {
+            stoneBox.setCell(e);
+            stoneBox.setVisible(true);
+
+            var x = e.getX() > getAppWidth() / 2.0 ? e.getX() - 250 : e.getX();
+
+            stoneBox.setTranslateX(x);
+            stoneBox.setTranslateY(e.getY());
+        }
+
+
     }
 
     public void onResourceSelected(Entity cell, ResourceData data) {
         if (geti(MONEY) - data.cost() >= 0) {
-            towerSelectionBox.setVisible(false);
+            treeBox.setVisible(false);
+            stoneBox.setVisible(false);
 
             inc(MONEY, -data.cost());
 
             System.out.println(cell.getPosition());
-            var tower = spawnWithScale(
-                    "building",
-                    new SpawnData(cell.getPosition()).put("towerData", data),
-                    Duration.seconds(0.85),
-                    Interpolators.ELASTIC.EASE_OUT()
-            );
+            if (cell.getProperties().exists("level")) {
+                cell.setProperty("level", ((int) cell.getProperties().getValue("level")) + 1);
+            } else {
+                cell.setProperty("level", 1);
+            }
+            run(() -> collectResource(cell, 1),Duration.seconds(3/(int) cell.getProperties().getValue("level")));
 
-            cell.setProperty("tower", tower);
-
-            numTowers++;
             setStats();
         }
-    }
-    public static void showHarvester(Entity e){
-
     }
 
     private TowerSelectionBox towerSelectionBox;
@@ -369,10 +391,10 @@ public class DropApp extends GameApplication {
     public static void collectResource(Entity e, double increment){
         if (e.isType(TREE)) {
 //                inc(WOOD, increment);
-            wood++;
+            wood+=increment;
         } else if (e.isType(Type.STONE)) {
 //                inc(STONE, increment);
-            cobblestone++;
+            cobblestone+=increment;
         }
         setStats();
     }

@@ -29,7 +29,7 @@ public class RescourceIcon extends VBox {
         bg.setStrokeWidth(2.5);
 
         var text = getUIFactoryService().newText(data.cost() + "");
-        text.setStroke(Color.BLACK);
+        text.setStroke(Color.LIGHTBLUE);
 
         texture = texture(data.imageName());
 

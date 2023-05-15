@@ -1,7 +1,7 @@
 {
   "name": "Harvester 1",
   "imageName": "towers/treeHarvester.png",
-  "getherAmt": 10,
+  "gatherAmt": 10,
   "gatherRate": 1,
   "cost": 50
 }
