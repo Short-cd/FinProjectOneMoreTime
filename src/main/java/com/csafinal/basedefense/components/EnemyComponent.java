@@ -23,9 +23,7 @@ public class EnemyComponent extends Component {
             target = nearestEnemy;
         });
         if (target != null) {
-            Point2D targetLoc = target.getPosition();
-            Vec2 targetDirection = new Vec2(targetLoc);
-            targetDirection.mulLocal(data.speed() / targetDirection.distance(targetLoc));
+            entity.translateTowards(target.getCenter(), data.speed());
         }
     }
 

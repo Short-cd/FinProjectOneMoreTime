@@ -1,6 +1,6 @@
 {
   "type": "ENEMY",
-  "hp": 700,
+  "hp": 900,
   "name": "boss2",
   "damage": 15,
   "speed": 0.2,

@@ -10,9 +10,7 @@ import com.almasb.fxgl.animation.Interpolators;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.core.math.Vec2;
-import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.dsl.components.HealthIntComponent;
-import com.almasb.fxgl.dsl.components.ProjectileComponent;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.input.UserAction;
@@ -20,13 +18,14 @@ import com.csafinal.basedefense.components.EnemyComponent;
 import com.csafinal.basedefense.components.MovementComponent;
 import com.csafinal.basedefense.components.PlayerComponent;
 import com.csafinal.basedefense.data.LivingThingData;
+import com.csafinal.basedefense.data.ResourceData;
 import com.csafinal.basedefense.data.TowerData;
+import com.csafinal.basedefense.ui.MoneyLivesView;
+import com.csafinal.basedefense.ui.ResourceSelectionBox;
 import com.csafinal.basedefense.ui.TowerSelectionBox;
 import javafx.animation.Interpolator;
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.List;
@@ -53,16 +52,28 @@ public class DropApp extends GameApplication {
 
     private boolean playerAlive;
 
-    private static int cobblestone = 0;
-    private static int wood = 0;
+    public static int cobblestone = 0;
+    public static int wood = 0;
+
+    public static int getCobblestone() {
+        return cobblestone;
+    }
+
+    public static int getWood() {
+        return wood;
+    }
 
     long startTime;
 
     public int lives = 3;
 
-    private int numTowers;
+    private int numTowers = 0;
+
+    static MoneyLivesView stats;
 
     private static List<TowerData> towerData;
+    private static List<ResourceData> treeData;
+    private static List<ResourceData> stoneData;
 
 //    private LivingThingData enemy1Data = getAssetLoader().loadJSON("enemies/enemy1.json", LivingThingData.class).get();
 //    private LivingThingData enemy2Data = getAssetLoader().loadJSON("enemies/enemy2.json", LivingThingData.class).get();
@@ -75,6 +86,8 @@ public class DropApp extends GameApplication {
         settings.setWidth(1600);
         settings.setHeight(896);
     }
+
+
 
     @Override
     protected void initGameVars(Map<String, Object> vars){
@@ -90,24 +103,51 @@ public class DropApp extends GameApplication {
     @Override
     protected void initGame() {
         startTime = System.nanoTime();
+        System.out.println(startTime);
 
         getGameWorld().addEntityFactory(new gameFactory());
         loadCurrentLevel();
         loadTowerData();
+        loadTreeData();
+        loadStoneData();
 
         LivingThingData playerData = getAssetLoader().loadJSON("playerTypes/player1.json", LivingThingData.class).get();
 //        spawn("player");
         player = spawn("player", new SpawnData().put("playerData", playerData));
         playerAlive = true;
 
-        LivingThingData enemyData = getAssetLoader().loadJSON("enemies/enemy1.json", LivingThingData.class).get();
-        run(() -> spawnWithScale("enemy",
+
+        run(() -> createEnemy(), Duration.seconds(2));
+        towerSelectionBox = new TowerSelectionBox(towerData);
+        treeBox = new ResourceSelectionBox(treeData);
+        stoneBox = new ResourceSelectionBox(stoneData);
+    }
+
+    public void createEnemy(){
+        if ((System.nanoTime() - startTime)/1000000000<30){
+            return;
+        }
+        LivingThingData enemyData;
+        int numEnemy = (int) (Math.random() * 1000000);
+        if (numEnemy < 300000){
+            enemyData = getAssetLoader().loadJSON("enemies/enemy1.json", LivingThingData.class).get();
+        } else if (numEnemy < 500000){
+            enemyData = getAssetLoader().loadJSON("enemies/enemy2.json", LivingThingData.class).get();
+        } else if (numEnemy < 800000){
+            enemyData = getAssetLoader().loadJSON("enemies/enemy3.json", LivingThingData.class).get();
+        } else if (numEnemy < 999800){
+            enemyData = getAssetLoader().loadJSON("enemies/enemy4.json", LivingThingData.class).get();
+        } else {
+            enemyData = getAssetLoader().loadJSON("enemies/enemy5.json", LivingThingData.class).get();
+        }
+
+        spawnWithScale("enemy",
                 new SpawnData()
                         .put("eData", enemyData),
-                Duration.seconds(3),
-                Interpolator.LINEAR), Duration.seconds(3));
-        towerSelectionBox = new TowerSelectionBox(towerData);
+                Duration.seconds(0.1),
+                Interpolator.LINEAR);
     }
+
     @Override
     protected void initInput(){
 
@@ -183,8 +223,16 @@ public class DropApp extends GameApplication {
             @Override
             protected void onAction() {
                 System.out.println("Stone count: " + cobblestone + "\n Wood count: " + wood);
+                setStats();
             }
         }, KeyCode.I);
+
+        getInput().addAction(new UserAction("closeSelection") {
+            @Override
+            protected void onAction() {
+                towerSelectionBox.setVisible(false);
+            }
+        }, KeyCode.Q);
 
         getInput().addAction(new UserAction("Revive") {
             @Override
@@ -205,6 +253,7 @@ public class DropApp extends GameApplication {
                 return;
             }
             building.removeFromWorld();
+            numTowers--;
         });
         onCollisionBegin(Type.PLAYER, Type.ENEMY, (player, enemy) -> {
             var hp = player.getComponent(HealthIntComponent.class);
@@ -226,8 +275,9 @@ public class DropApp extends GameApplication {
     @Override
     protected void initUI() {
         towerSelectionBox.setVisible(false);
-
+        setStats();
         addUINode(towerSelectionBox);
+        addUINode(stats);
     }
 
     private Point2D checkCollisionLocation(Entity thing1, Entity thing2){
@@ -256,12 +306,37 @@ public class DropApp extends GameApplication {
         return newPoint;
     }
 
+    private ResourceSelectionBox treeBox;
+
+    private ResourceSelectionBox stoneBox;
+
     public void onResourceClicked(Entity e) {
         if (e.getProperties().exists("resourceHarvester")) {
             onHarvesterClicked(e);
         } else {
             collectResource(e, 1);
             showHarvester(e);
+        }
+    }
+
+    public void onResourceSelected(Entity cell, ResourceData data) {
+        if (geti(MONEY) - data.cost() >= 0) {
+            towerSelectionBox.setVisible(false);
+
+            inc(MONEY, -data.cost());
+
+            System.out.println(cell.getPosition());
+            var tower = spawnWithScale(
+                    "building",
+                    new SpawnData(cell.getPosition()).put("towerData", data),
+                    Duration.seconds(0.85),
+                    Interpolators.ELASTIC.EASE_OUT()
+            );
+
+            cell.setProperty("tower", tower);
+
+            numTowers++;
+            setStats();
         }
     }
     public static void showHarvester(Entity e){
@@ -287,6 +362,7 @@ public class DropApp extends GameApplication {
             cell.setProperty("tower", tower);
 
             numTowers++;
+            setStats();
         }
     }
 
@@ -298,6 +374,7 @@ public class DropApp extends GameApplication {
 //                inc(STONE, increment);
             cobblestone++;
         }
+        setStats();
     }
 
     private void onHarvesterClicked(Entity e) {//upgrade harvester
@@ -306,7 +383,10 @@ public class DropApp extends GameApplication {
     public void onCellClicked(Entity cell) {
         // if we already have a tower on this tower base, ignore call
         if (cell.getProperties().exists("tower")) {
-            return;
+            if (cell.getProperties().getValue("tower")!=null) {
+                System.out.println("towerExists");
+                return;
+            }
         }
 
         System.out.println("cellclicked: (" + cell.getX() +", " + cell.getY() + ")");
@@ -320,9 +400,17 @@ public class DropApp extends GameApplication {
         towerSelectionBox.setTranslateY(cell.getY());
     }
 
+    public static void setStats() {
+        if (stats == null){
+            stats = new MoneyLivesView();
+        }
+        stats.resetChildren();
+        stats.setVisible(true);
+    }
 
     @Override
     protected void onUpdate(double tpf) {
+        setStats();
     }
     private void loadPlayerData(){
 
@@ -343,6 +431,26 @@ public class DropApp extends GameApplication {
                 .toList();
     }
 
+    private void loadTreeData() {
+        List<String> treeName = List.of(
+                "tree1.json"
+        );
+
+        treeData = treeName.stream()
+                .map(name -> getAssetLoader().loadJSON("towers/" + name, ResourceData.class).get())
+                .toList();
+    }
+
+    private void loadStoneData() {
+        List<String> stoneName = List.of(
+                "stone1.json"
+        );
+
+        stoneData = stoneName.stream()
+                .map(name -> getAssetLoader().loadJSON("towers/" + name, ResourceData.class).get())
+                .toList();
+    }
+
 
     private void loadCurrentLevel() {
         setLevelFromMap("tmx/td1.tmx");
@@ -360,6 +468,7 @@ public class DropApp extends GameApplication {
 
     public void onEnemyKilled(Entity enemy) {
         inc(MONEY, enemy.getComponent(EnemyComponent.class).getData().reward());
+        setStats();
     }
 
     public void revivePlayer(){
@@ -373,6 +482,7 @@ public class DropApp extends GameApplication {
                 endGame();
             }
         }
+        setStats();
     }
 
     private void endGame(){

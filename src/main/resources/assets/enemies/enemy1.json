@@ -1,6 +1,6 @@
 {
   "type": "ENEMY",
-  "hp": 150,
+  "hp": 200,
   "name": "enemy1",
   "damage": 2,
   "speed": 5,

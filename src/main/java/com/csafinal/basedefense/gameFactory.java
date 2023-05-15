@@ -4,16 +4,15 @@ import com.almasb.fxgl.core.math.FXGLMath;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.dsl.components.AutoRotationComponent;
 import com.almasb.fxgl.dsl.components.HealthIntComponent;
-import com.almasb.fxgl.dsl.components.ProjectileComponent;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
+import com.almasb.fxgl.ui.ProgressBar;
 import com.csafinal.basedefense.components.*;
 import com.csafinal.basedefense.data.LivingThingData;
 import com.csafinal.basedefense.data.TowerData;
 import javafx.beans.binding.Bindings;
-import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -44,19 +43,24 @@ public class gameFactory implements EntityFactory{
     @Spawns("enemy")
     public Entity spawnEnemy(SpawnData data){
         LivingThingData eData = data.get("eData");
-        HealthIntComponent hp = new HealthIntComponent(2);
+        HealthIntComponent hp = new HealthIntComponent(eData.hp());
+
+        var hpView = new ProgressBar(true);
+        hpView.setFill(Color.RED);
+        hpView.setMaxValue(eData.hp());
+        hpView.setWidth(64);
+        hpView.setTranslateY(70);
+        hpView.currentValueProperty().bind(hp.valueProperty());
+
         int xval = FXGLMath.random(0, getAppWidth() - 64);
-        int yval = FXGLMath.random(0, getAppHeight() - 64);;
-        int targetx = 200;
-        int targety = 200;
-        System.out.println(xval);
+        int yval = FXGLMath.random(0, getAppHeight() - 64);
         return entityBuilder(data)
                 .type(DropApp.Type.ENEMY)
                 .at(xval, yval)
-                .with(new ProjectileComponent(new Point2D((int) (targetx - xval), (int) (targety - yval)), 150))
                 .with(new HealthIntComponent(eData.hp()))
                 .with(new EnemyComponent(eData))
-                .viewWithBBox("enemies/enemy1.png")
+                .view(hpView)
+                .viewWithBBox("enemies/" + eData.imageName())
                 .collidable()
                 .build();
     }

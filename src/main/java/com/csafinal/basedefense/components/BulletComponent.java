@@ -4,6 +4,7 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.dsl.components.HealthIntComponent;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
+import com.almasb.fxgl.ui.ProgressBar;
 import com.csafinal.basedefense.DropApp;
 import com.csafinal.basedefense.data.Config;
 
@@ -43,6 +44,8 @@ public class BulletComponent extends Component {
         var hp = target.getComponent(HealthIntComponent.class);
 
         hp.damage(data.getDamage());
+
+//        target.getProperties((ProgressBar.class))
 
         if (hp.isZero()) {
             FXGL.<DropApp>getAppCast().onEnemyKilled(target);

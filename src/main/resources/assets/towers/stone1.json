@@ -1,0 +1,7 @@
+{
+  "name": "Miner 1",
+  "imageName": "towers/stoneMiner.png",
+  "getherAmt": 10,
+  "gatherRate": 1,
+  "cost": 50
+}
